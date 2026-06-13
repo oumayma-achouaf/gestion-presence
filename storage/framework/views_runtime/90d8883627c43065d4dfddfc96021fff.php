@@ -1,0 +1,242 @@
+<?php $__env->startSection('title', 'Planning | Gestion des Absences'); ?>
+<?php $__env->startSection('page-title', 'Planning'); ?>
+
+<?php $__env->startSection('content'); ?>
+
+<style>
+.planning-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.planning-shell{
+    border-radius:18px;
+    border:1px solid #eef2f7;
+    background:#f8fafc;
+    padding:14px;
+}
+
+.station-planning{
+    width:100%;
+    min-width:1120px;
+    border-collapse:separate;
+    border-spacing:0 8px;
+}
+
+.station-planning th{
+    color:#64748b;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:12px;
+}
+
+.station-planning td,
+.station-planning .planning-employee-cell{
+    background:#fff;
+    border-top:1px solid #eef2f7;
+    border-bottom:1px solid #eef2f7;
+    padding:0;
+    height:54px;
+    vertical-align:middle;
+    box-shadow:0 8px 20px rgba(15,23,42,0.04);
+}
+
+.station-planning tr:hover td,
+.station-planning tr:hover .planning-employee-cell{
+    background:#f8fafc;
+}
+
+.planning-employee-cell{
+    width:240px;
+    border-left:1px solid #eef2f7;
+    border-radius:14px 0 0 14px;
+}
+
+.station-planning td:last-child{
+    border-right:1px solid #eef2f7;
+    border-radius:0 14px 14px 0;
+}
+
+.day-head{
+    min-width:120px;
+    text-align:center;
+}
+
+.day-name{
+    display:block;
+    color:#0f172a;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:capitalize;
+}
+
+.day-date{
+    display:block;
+    margin-top:4px;
+    color:#64748b;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0;
+}
+
+.period-row th{
+    padding:18px 12px 8px;
+    color:#0f172a;
+    font-size:14px;
+    letter-spacing:0;
+    text-align:left;
+    text-transform:none;
+}
+
+.period-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:#eef2ff;
+    color:#3730a3;
+    font-weight:900;
+}
+
+.planning-select,
+.employee-row-select{
+    width:100%;
+    height:54px;
+    border:0;
+    background:transparent;
+    color:#0f172a;
+    font-size:13px;
+    font-weight:800;
+    text-align:center;
+    cursor:pointer;
+}
+
+.employee-row-select{
+    padding:0 14px;
+    text-align:left;
+}
+
+.planning-select:focus,
+.employee-row-select:focus{
+    outline:none;
+    box-shadow:inset 0 0 0 3px rgba(37,99,235,0.18);
+    background:#fff;
+}
+
+.role-repos select{ background:#ede9fe; color:#5b21b6; }
+.role-conge select{ background:#ffedd5; color:#c2410c; }
+.role-controle select{ background:#dcfce7; color:#15803d; }
+
+.save-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:18px;
+}
+
+@media print{
+    .sidebar,.topbar,.planning-toolbar,.save-row,.page-head{
+        display:none !important;
+    }
+
+    .card-box,
+    .planning-shell{
+        border:0;
+        box-shadow:none;
+        padding:0;
+    }
+}
+</style>
+
+<div class="page-head">
+    <div>
+        <div class="page-kicker">Organisation hebdomadaire</div>
+        <h1 class="page-heading">Planning</h1>
+        <div class="page-subtitle">
+            Du <?php echo e($weekStart->format('d/m/Y')); ?> au <?php echo e($weekEnd->format('d/m/Y')); ?>
+
+        </div>
+    </div>
+
+    <div class="planning-toolbar">
+        <a class="btn btn-outline-secondary" href="<?php echo e(route('planning.index', ['week' => $weekStart->copy()->subWeek()->toDateString()])); ?>">Précédent</a>
+        <a class="btn btn-outline-secondary" href="<?php echo e(route('planning.index', ['week' => now()->startOfWeek()->toDateString()])); ?>">Semaine actuelle</a>
+        <a class="btn btn-outline-secondary" href="<?php echo e(route('planning.index', ['week' => $weekStart->copy()->addWeek()->toDateString()])); ?>">Suivant</a>
+        <button type="button" class="btn btn-outline-primary" onclick="window.print()">Imprimer</button>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="panel-head">
+        <div>
+            <h2 class="section-title">TAZA Gare Routière</h2>
+            <div class="section-sub">Affectations par période et par jour</div>
+        </div>
+    </div>
+
+    <form method="POST" action="<?php echo e(route('planning.bulk-save')); ?>">
+        <?php echo csrf_field(); ?>
+        <input type="hidden" name="week" value="<?php echo e($weekStart->toDateString()); ?>">
+
+        <div class="planning-shell table-responsive">
+            <table class="station-planning">
+                <thead>
+                    <tr>
+                        <th class="day-head text-start">Employé</th>
+                        <?php $__currentLoopData = $days; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $day): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <th class="day-head">
+                                <span class="day-name"><?php echo e($day->locale('fr')->translatedFormat('l')); ?></span>
+                                <span class="day-date"><?php echo e($day->format('d/m')); ?></span>
+                            </th>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr class="period-row">
+                        <th colspan="8"><span class="period-pill">Matin</span></th>
+                    </tr>
+
+                    <?php $__currentLoopData = $periodEmployees['MATIN']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php echo $__env->make('planning.partials.employee-row', ['period' => 'MATIN'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                    <tr class="period-row">
+                        <th colspan="8"><span class="period-pill">Soir</span></th>
+                    </tr>
+
+                    <?php $__currentLoopData = $periodEmployees['SOIR']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php echo $__env->make('planning.partials.employee-row', ['period' => 'SOIR'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="save-row">
+            <button class="btn btn-primary px-4">Enregistrer la semaine</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function updatePlanningRowEmployee(select){
+    const row = select.closest('tr');
+    const period = row.dataset.period;
+    const employeeId = select.value;
+    const employeeName = select.options[select.selectedIndex].text.trim();
+
+    row.querySelectorAll('.planning-role-select').forEach((roleSelect)=>{
+        const date = roleSelect.dataset.date;
+        roleSelect.name = `schedule[${period}][${employeeId}][${date}]`;
+        roleSelect.setAttribute('aria-label', `${employeeName} ${period} ${date}`);
+    });
+}
+</script>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xa\htdocs\gestion-d-present\presence-system\resources\views\planning\index.blade.php ENDPATH**/ ?>

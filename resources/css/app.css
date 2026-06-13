@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+/* ===== GLOBAL STYLE ===== */
+body {
+    background: #f5f7fb;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== EXCEL PLANNING STYLE ===== */
+.excel-box{
+    background:white;
+    border-radius:12px;
+    overflow:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.excel-table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:900px;
+}
+
+.excel-table th{
+    background:#f1f5f9;
+    border:1px solid #e5e7eb;
+    padding:12px;
+    font-size:13px;
+}
+
+.excel-table td{
+    border:1px solid #e5e7eb;
+    padding:6px;
+    text-align:center;
+}
+
+.emp-col{
+    background:#f9fafb;
+    font-weight:bold;
+    position:sticky;
+    left:0;
+    z-index:1;
+}
+
+/* SELECT STYLE */
+.shift{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-size:12px;
+    text-align:center;
+}
+
+.shift:focus{
+    outline:none;
+    box-shadow:0 0 0 2px rgba(13,110,253,.15);
+}
+
+/* HOVER EFFECT */
+.excel-table tr:hover td{
+    background:#f8fafc;
+}
