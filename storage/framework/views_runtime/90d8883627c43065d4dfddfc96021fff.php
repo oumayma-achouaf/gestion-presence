@@ -103,8 +103,7 @@
     font-weight:900;
 }
 
-.planning-select,
-.employee-row-select{
+.planning-select{
     width:100%;
     height:54px;
     border:0;
@@ -116,13 +115,18 @@
     cursor:pointer;
 }
 
-.employee-row-select{
+.employee-row-label{
+    display:flex;
+    align-items:center;
+    width:100%;
+    height:54px;
     padding:0 14px;
-    text-align:left;
+    color:#0f172a;
+    font-size:13px;
+    font-weight:800;
 }
 
-.planning-select:focus,
-.employee-row-select:focus{
+.planning-select:focus{
     outline:none;
     box-shadow:inset 0 0 0 3px rgba(37,99,235,0.18);
     background:#fff;
@@ -221,21 +225,6 @@
         </div>
     </form>
 </div>
-
-<script>
-function updatePlanningRowEmployee(select){
-    const row = select.closest('tr');
-    const period = row.dataset.period;
-    const employeeId = select.value;
-    const employeeName = select.options[select.selectedIndex].text.trim();
-
-    row.querySelectorAll('.planning-role-select').forEach((roleSelect)=>{
-        const date = roleSelect.dataset.date;
-        roleSelect.name = `schedule[${period}][${employeeId}][${date}]`;
-        roleSelect.setAttribute('aria-label', `${employeeName} ${period} ${date}`);
-    });
-}
-</script>
 
 <?php $__env->stopSection(); ?>
 

@@ -1,13 +1,6 @@
 <tr data-period="<?php echo e($period); ?>">
     <th class="planning-employee-cell">
-        <select class="employee-row-select" aria-label="Employé <?php echo e($period); ?>" onchange="updatePlanningRowEmployee(this)">
-            <?php $__currentLoopData = $employeeOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $optionEmployee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <option value="<?php echo e($optionEmployee->id); ?>" <?php if($optionEmployee->id === $employee->id): echo 'selected'; endif; ?>>
-                    <?php echo e(strtoupper($optionEmployee->name)); ?>
-
-                </option>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        </select>
+        <span class="employee-row-label"><?php echo e(strtoupper($employee->name)); ?></span>
     </th>
 
     <?php $__currentLoopData = $days; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $day): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
