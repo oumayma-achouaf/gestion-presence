@@ -13,6 +13,8 @@ use Illuminate\View\View;
 
 class PlanningController extends Controller
 {
+    private const ROTATION_ANCHOR_WEEK = '2026-08-17';
+
     public function index(Request $request): View
     {
         $weekStart = $this->weekStart($request);
@@ -103,7 +105,7 @@ class PlanningController extends Controller
         $days = collect(range(0, 6))->map(fn (int $offset) => $weekStart->copy()->addDays($offset));
         $weekEnd = $weekStart->copy()->addDays(6);
         $employees = Employee::active()->with('user')->orderBy('name')->get();
-        $splitAt = (int) ceil($employees->count() / 2);
+        $periodEmployees = $this->periodEmployees($employees, $weekStart);
 
         $planningMatrix = Planning::whereBetween('date', [
             $weekStart->toDateString(),
@@ -120,16 +122,40 @@ class PlanningController extends Controller
         return [
             'days' => $days,
             'employees' => $employees,
-            'employeeOptions' => $employees,
-            'periodEmployees' => [
-                'MATIN' => $employees->take($splitAt)->values(),
-                'SOIR' => $employees->skip($splitAt)->values(),
-            ],
+            'periodEmployees' => $periodEmployees,
             'periods' => Planning::PERIODS,
             'planningMatrix' => $planningMatrix,
             'roles' => Planning::ROLES,
             'weekEnd' => $weekEnd,
             'weekStart' => $weekStart,
         ];
+    }
+
+    private function periodEmployees($employees, Carbon $weekStart): array
+    {
+        $splitAt = (int) ceil($employees->count() / 2);
+        $morningEmployees = $employees->take($splitAt)->values();
+        $eveningEmployees = $employees->skip($splitAt)->values();
+
+        if ($this->shouldSwapPeriods($weekStart)) {
+            return [
+                'MATIN' => $eveningEmployees,
+                'SOIR' => $morningEmployees,
+            ];
+        }
+
+        return [
+            'MATIN' => $morningEmployees,
+            'SOIR' => $eveningEmployees,
+        ];
+    }
+
+    private function shouldSwapPeriods(Carbon $weekStart): bool
+    {
+        $anchorWeekStart = Carbon::parse(self::ROTATION_ANCHOR_WEEK)->startOfWeek();
+        $daysFromAnchor = $anchorWeekStart->diffInDays($weekStart->copy()->startOfWeek(), false);
+        $weeksFromAnchor = intdiv((int) abs($daysFromAnchor), 7);
+
+        return $weeksFromAnchor % 2 === 1;
     }
 }

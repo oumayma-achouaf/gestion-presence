@@ -1,12 +1,6 @@
 <tr data-period="{{ $period }}">
     <th class="planning-employee-cell">
-        <select class="employee-row-select" aria-label="Employé {{ $period }}" onchange="updatePlanningRowEmployee(this)">
-            @foreach ($employeeOptions as $optionEmployee)
-                <option value="{{ $optionEmployee->id }}" @selected($optionEmployee->id === $employee->id)>
-                    {{ strtoupper($optionEmployee->name) }}
-                </option>
-            @endforeach
-        </select>
+        <span class="employee-row-label">{{ strtoupper($employee->name) }}</span>
     </th>
 
     @foreach ($days as $day)
